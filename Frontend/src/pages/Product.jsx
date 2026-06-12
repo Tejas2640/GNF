@@ -16,7 +16,7 @@ export default function Products() {
   try {
     const res = await api.get("/products");
 
-    console.log("API RESPONSE:", res.data);
+    
 
     setProducts(res.data.products); // ✅ FIXED
   } catch (error) {
