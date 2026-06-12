@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# env files (VERY IMPORTANT)
+.env
+.env.local
+.env.development
+.env.production
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# runtime
+dist/
+build/
+
+# uploads (if using multer or file uploads)
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
