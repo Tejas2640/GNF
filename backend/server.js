@@ -15,35 +15,19 @@ connectDB();
 const app = express();
 
 /* ========================
-   CORS CONFIG (PRODUCTION SAFE)
+   CORS (PERMANENT FIX)
 ======================== */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://gnf-delta.vercel.app",
-  "https://gnf-git-main-tjs03.vercel.app"
-];
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://gnf-delta.vercel.app"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow Postman / server-to-server
-      if (!origin) return callback(null, true);
-
-      // SAFE CHECK (no crash, no random block)
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(null, true); // IMPORTANT: prevents CORS breaking
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
-
-// preflight support
 app.options("*", cors());
 
 /* ========================
@@ -60,18 +44,19 @@ app.get("/", (req, res) => {
 });
 
 /* ========================
-   ROUTES
+   ROUTES (IMPORTANT)
 ======================== */
-app.use("/products", productRoutes);
-app.use("/enquiries", enquiryRoutes);
-app.use("/admin", adminRoutes);
+
+// IMPORTANT: keep /api prefix SAME as frontend
+app.use("/api/products", productRoutes);
+app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* ========================
    ERROR HANDLER
 ======================== */
 app.use((err, req, res, next) => {
   console.error("❌ SERVER ERROR:", err);
-
   res.status(500).json({
     success: false,
     message: err.message || "Internal Server Error",
