@@ -15,7 +15,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "http://gnf-delta.vercel.app",
   credentials: true
 }));
 
