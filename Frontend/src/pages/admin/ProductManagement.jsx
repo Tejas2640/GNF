@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -15,7 +15,7 @@ export default function ProductManagement() {
   const token = localStorage.getItem("token");
 
   const fetchProducts = async () => {
-    const res = await axios.get("http://localhost:1503/api/products");
+    const res = await api.get("/products");
     setProducts(res.data);
   };
 
@@ -48,7 +48,7 @@ export default function ProductManagement() {
       fd.append("images", form.images[i]);
     }
 
-    await axios.post("http://localhost:1503/api/products", fd, {
+    await api.post("/products", fd, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
@@ -60,7 +60,7 @@ export default function ProductManagement() {
   };
 
   const deleteProduct = async (id) => {
-    await axios.delete(`http://localhost:1503/api/products/${id}`, {
+    await api.delete(`/products/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -89,8 +89,7 @@ export default function ProductManagement() {
       fd.append("images", form.images[i]);
     }
 
-    await axios.put(
-      `http://localhost:1503/api/products/${editId}`,
+    await api.put(`/products/${editId}`,
       fd,
       {
         headers: {

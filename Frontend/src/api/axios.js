@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:1503/api",
+  baseURL: "https://gnf-1.onrender.com/api",
 });
 
 export default api;

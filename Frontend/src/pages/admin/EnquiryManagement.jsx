@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../../api/axios";
 
 export default function EnquiryManagement() {
   const [enquiries, setEnquiries] = useState([]);
@@ -7,8 +8,7 @@ export default function EnquiryManagement() {
 
   const fetchEnquiries = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:1503/api/enquiries",
+      const res = await api.get("/enquiries",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -25,19 +25,16 @@ export default function EnquiryManagement() {
   }, []);
 
   const deleteEnquiry = async (id) => {
-    await axios.delete(
-      `http://localhost:1503/api/enquiries/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    await api.delete(`/enquiries/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     fetchEnquiries();
   };
 
   const updateStatus = async (id, status) => {
-    await axios.put(
-      `http://localhost:1503/api/enquiries/${id}`,
+    await api.put(
+      `/enquiries/${id}`,
       { status },
       {
         headers: { Authorization: `Bearer ${token}` },
