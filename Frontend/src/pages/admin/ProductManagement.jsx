@@ -14,13 +14,26 @@ export default function ProductManagement() {
 
   const token = localStorage.getItem("token");
 
-  // ✅ SAFE FETCH
+  // ✅ SAFE FETCH (FIXED)
   const fetchProducts = async () => {
     try {
       const res = await api.get("/products");
-      setProducts(res.data);
+
+      const data = res.data;
+
+      // 🔥 SAFE CHECK (MOST IMPORTANT FIX)
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (Array.isArray(data?.products)) {
+        setProducts(data.products);
+      } else {
+        console.log("Unexpected API format:", data);
+        setProducts([]);
+      }
+
     } catch (err) {
       console.log("Fetch Error:", err.message);
+      setProducts([]);
     }
   };
 
@@ -118,7 +131,7 @@ export default function ProductManagement() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-slate-950 text-white">
 
-      {/* UI SAME (UNCHANGED) */}
+      {/* BACKGROUND */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute w-125 h-125 bg-purple-500 blur-[140px] opacity-20 animate-pulse top-10 left-10" />
         <div className="absolute w-125 h-125 bg-blue-500 blur-[140px] opacity-20 animate-pulse bottom-10 right-10" />
@@ -131,6 +144,7 @@ export default function ProductManagement() {
           Add, edit and manage your products
         </p>
 
+        {/* FORM */}
         <form
           onSubmit={editId ? updateProduct : addProduct}
           className="backdrop-blur-xl bg-white/5 border border-white/10 p-6 rounded-3xl shadow-xl mb-10"
@@ -169,21 +183,30 @@ export default function ProductManagement() {
 
         </form>
 
-        {/* GRID SAME */}
+        {/* GRID */}
         <div className="grid md:grid-cols-3 gap-8">
-          {products.map((p) => (
-            <div key={p._id} className="p-5 bg-white/5 rounded-xl">
 
-              <img src={p.images?.[0]?.url} />
+          {Array.isArray(products) && products.length > 0 ? (
+            products.map((p) => (
+              <div key={p._id} className="p-5 bg-white/5 rounded-xl">
 
-              <h2>{p.name}</h2>
-              <p>₹{p.price}</p>
+                <img
+                  src={p.images?.[0]?.url || "https://via.placeholder.com/300"}
+                  alt={p.name}
+                />
 
-              <button onClick={() => startEdit(p)}>Edit</button>
-              <button onClick={() => deleteProduct(p._id)}>Delete</button>
+                <h2>{p.name}</h2>
+                <p>₹{p.price}</p>
 
-            </div>
-          ))}
+                <button onClick={() => startEdit(p)}>Edit</button>
+                <button onClick={() => deleteProduct(p._id)}>Delete</button>
+
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400">No products found</p>
+          )}
+
         </div>
 
       </div>
