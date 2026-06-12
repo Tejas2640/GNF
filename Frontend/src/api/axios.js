@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://gnf-1.onrender.com/api",
+  baseURL: "http://gnf-git-main-tjs03.vercel.app/api",
 });
 
 export default api;
