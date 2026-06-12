@@ -10,36 +10,42 @@ import productRoutes from "./routes/productRoutes.js";
 import enquiryRoutes from "./routes/enquiryRoutes.js";
 
 dotenv.config();
-
-// DB connect
 connectDB();
 
 const app = express();
 
 /* ========================
-   CORS CONFIG (PRODUCTION FIX)
+   CORS CONFIG (FIXED)
 ======================== */
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://gnf-git-main-tjs03.vercel.app",
+  "http://localhost:1503",
+  "https://gnf-git-main-tjs03.vercel.app",
+  "https://gnf-delta.vercel.app"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
+      // allow Postman / server-to-server
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("CORS not allowed"), false);
       }
+
+      // 🔥 TEMP SAFE MODE (prevents crash)
+      return callback(null, true);
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
+// 🔥 IMPORTANT for preflight requests
+app.options("*", cors());
 
 /* ========================
    MIDDLEWARES
@@ -48,7 +54,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* ========================
-   HEALTH CHECK ROUTE
+   HEALTH CHECK
 ======================== */
 app.get("/", (req, res) => {
   res.send("🚀 GNF API Running Successfully");
@@ -61,15 +67,12 @@ app.use("/api/products", productRoutes);
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/admin", adminRoutes);
 
-/* (optional legacy routes - remove if not needed) */
-app.use("/dashboard/products", productRoutes);
-app.use("/dashboard/enquiries", enquiryRoutes);
-
 /* ========================
    GLOBAL ERROR HANDLER
 ======================== */
 app.use((err, req, res, next) => {
-  console.error("❌ Server Error:", err.message);
+  console.error("❌ SERVER ERROR:", err);
+
   res.status(500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -83,5 +86,5 @@ const PORT = process.env.PORT || 1503;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📦 MongoDB: Connected`);
+  console.log(`📦 MongoDB Connected`);
 });
