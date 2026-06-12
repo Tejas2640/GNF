@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import api from "../../api/axios";
 
 export default function EnquiryManagement() {
@@ -8,15 +7,15 @@ export default function EnquiryManagement() {
 
   const fetchEnquiries = async () => {
     try {
-      const res = await api.get("/enquiries",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await api.get("/enquiries", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setEnquiries(res.data);
     } catch (err) {
-      console.log(err);
+      console.log("Fetch Error:", err.message);
     }
   };
 
@@ -25,23 +24,35 @@ export default function EnquiryManagement() {
   }, []);
 
   const deleteEnquiry = async (id) => {
-    await api.delete(`/enquiries/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await api.delete(`/enquiries/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    fetchEnquiries();
+      fetchEnquiries();
+    } catch (err) {
+      console.log("Delete Error:", err.message);
+    }
   };
 
   const updateStatus = async (id, status) => {
-    await api.put(
-      `/enquiries/${id}`,
-      { status },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    try {
+      await api.put(
+        `/enquiries/${id}`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    fetchEnquiries();
+      fetchEnquiries();
+    } catch (err) {
+      console.log("Update Error:", err.message);
+    }
   };
 
   return (
@@ -69,7 +80,6 @@ export default function EnquiryManagement() {
             className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 shadow-lg hover:scale-[1.02] transition"
           >
 
-            {/* HEADER */}
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-xl font-bold">{e.name}</h3>
@@ -92,12 +102,10 @@ export default function EnquiryManagement() {
               </span>
             </div>
 
-            {/* MESSAGE */}
             <p className="mt-4 text-gray-300">
               {e.message}
             </p>
 
-            {/* ACTIONS */}
             <div className="flex gap-3 mt-5">
 
               <button
