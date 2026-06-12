@@ -9,17 +9,12 @@ import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// memory storage (IMPORTANT for Cloudinary)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
-// CREATE PRODUCT
 router.post("/", protect, upload.array("images", 10), createProduct);
 
-// GET PRODUCTS
 router.get("/", getProducts);
 
-// DELETE PRODUCT
 router.delete("/:id", protect, deleteProduct);
 
 export default router;

@@ -3,8 +3,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./config/db.js";
+
+import adminRoutes from "./routes/adminRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import enquiryRoutes from "./routes/enquiryRoutes.js";
 
@@ -14,13 +15,14 @@ connectDB();
 const app = express();
 
 /* =========================
-   CORS (FINAL FIX)
+   CORS FIX (FINAL STABLE)
 ========================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:1503",
   "https://gnf-delta.vercel.app",
-  "https://gnf-git-main-tjs03.vercel.app"
+  "https://gnf-lpruod7mx-tjs03.vercel.app"
 ];
 
 app.use(
@@ -32,12 +34,11 @@ app.use(
         return callback(null, true);
       }
 
-      // fallback (prevents production crash)
-      return callback(null, true);
+      return callback(null, true); // prevent crash
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 
@@ -52,13 +53,27 @@ app.use(cookieParser());
 /* =========================
    ROUTES
 ========================= */
-app.get("/", (req, res) => {
-  res.send("🚀 GNF API Running Successfully");
-});
-
 app.use("/api/products", productRoutes);
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/admin", adminRoutes);
+
+/* =========================
+   HEALTH CHECK
+========================= */
+app.get("/", (req, res) => {
+  res.send("🚀 API Running Successfully");
+});
+
+/* =========================
+   ERROR HANDLER
+========================= */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Server Error",
+  });
+});
 
 /* =========================
    START SERVER
@@ -66,6 +81,6 @@ app.use("/api/admin", adminRoutes);
 const PORT = process.env.PORT || 1503;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on ${PORT}`);
   console.log(`📦 MongoDB Connected`);
 });

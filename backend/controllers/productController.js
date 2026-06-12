@@ -1,7 +1,7 @@
 import Product from "../models/Product.js";
 import cloudinary from "../config/cloudinary.js";
 
-// CREATE PRODUCT (WITH CLOUDINARY UPLOAD)
+// CREATE
 export const createProduct = async (req, res) => {
   try {
     const images = [];
@@ -10,59 +10,65 @@ export const createProduct = async (req, res) => {
       for (const file of req.files) {
         const base64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-        const uploadResult = await cloudinary.uploader.upload(base64, {
+        const upload = await cloudinary.uploader.upload(base64, {
           folder: "gate-products",
         });
 
         images.push({
-          url: uploadResult.secure_url,
-          public_id: uploadResult.public_id,
+          url: upload.secure_url,
+          public_id: upload.public_id,
         });
       }
     }
 
     const product = await Product.create({
       name: req.body.name,
+      price: req.body.price,
       description: req.body.description,
       category: req.body.category,
-      price: req.body.price,
       images,
     });
 
     res.status(201).json(product);
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// GET ALL PRODUCTS
+// GET ALL (IMPORTANT FIX)
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
+
+    res.status(200).json({
+      success: true,
+      products,   // 🔥 ALWAYS ARRAY INSIDE KEY
+    });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// DELETE PRODUCT
+// DELETE
 export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Not found" });
     }
 
-    // delete images from cloudinary
     for (const img of product.images) {
       await cloudinary.uploader.destroy(img.public_id);
     }
 
     await product.deleteOne();
 
-    res.json({ message: "Product deleted" });
+    res.json({ message: "Deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
