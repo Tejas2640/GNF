@@ -17,33 +17,30 @@ const app = express();
 /* =========================
    CORS FIX (FINAL STABLE)
 ========================= */
-
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:1503",
-  "https://gnf-delta.vercel.app",
-  "https://gnf-lpruod7mx-tjs03.vercel.app"
+  "https://gnf-delta.vercel.app"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow Postman / server-to-server (no origin)
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      return callback(null, true); // prevent crash
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
+    console.log("Blocked Origin:", origin);
+    return callback(new Error("CORS not allowed"), false);
+    console.log("Request Origin:", origin);
+  },
+  credentials: true
+}));
 
-app.options("*", cors());
 
+// FIXED PRE-FLIGHT
+app.options(/.*/, cors());
 /* =========================
    MIDDLEWARE
 ========================= */
