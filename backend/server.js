@@ -22,8 +22,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:1503",
-  "https://gnf-delta.vercel.app"
+  "https://gnf-delta.vercel.app",
 ];
 
 app.use(
