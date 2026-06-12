@@ -13,28 +13,17 @@ export default function Products() {
   }, []);
 
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
+  try {
+    const res = await api.get("/products");
 
-      const res = await api.get("/products");
+    console.log("API RESPONSE:", res.data);
 
-      console.log("API RESPONSE:", res.data);
-
-      // 🔥 SAFE NORMALIZATION (fixes e.map error)
-      const productsData =
-        res.data?.products ||
-        res.data?.data ||
-        res.data ||
-        [];
-
-      setProducts(Array.isArray(productsData) ? productsData : []);
-    } catch (error) {
-      console.log("Fetch Products Error:", error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setProducts(res.data.products); // ✅ FIXED
+  } catch (error) {
+    console.log(error);
+    setProducts([]);
+  }
+};
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
