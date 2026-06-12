@@ -14,23 +14,21 @@ export default function ProductManagement() {
 
   const token = localStorage.getItem("token");
 
-  // ✅ SAFE FETCH (FIXED)
   const fetchProducts = async () => {
     try {
       const res = await api.get("/products");
 
       const data = res.data;
 
-      // 🔥 SAFE CHECK (MOST IMPORTANT FIX)
-      if (Array.isArray(data)) {
-        setProducts(data);
-      } else if (Array.isArray(data?.products)) {
-        setProducts(data.products);
-      } else {
-        console.log("Unexpected API format:", data);
-        setProducts([]);
-      }
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.products)
+        ? data.products
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
 
+      setProducts(list);
     } catch (err) {
       console.log("Fetch Error:", err.message);
       setProducts([]);
@@ -66,30 +64,20 @@ export default function ProductManagement() {
       fd.append("images", form.images[i]);
     }
 
-    try {
-      await api.post("/products", fd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    await api.post("/products", fd, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      reset();
-      fetchProducts();
-    } catch (err) {
-      console.log("Add Error:", err.message);
-    }
+    reset();
+    fetchProducts();
   };
 
   const deleteProduct = async (id) => {
-    try {
-      await api.delete(`/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    await api.delete(`/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      fetchProducts();
-    } catch (err) {
-      console.log("Delete Error:", err.message);
-    }
+    fetchProducts();
   };
 
   const startEdit = (p) => {
@@ -114,97 +102,47 @@ export default function ProductManagement() {
       fd.append("images", form.images[i]);
     }
 
-    try {
-      await api.put(`/products/${editId}`, fd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    await api.put(`/products/${editId}`, fd, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      reset();
-      fetchProducts();
-    } catch (err) {
-      console.log("Update Error:", err.message);
-    }
+    reset();
+    fetchProducts();
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950 text-white">
+    <div className="min-h-screen text-white bg-slate-950">
 
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute w-125 h-125 bg-purple-500 blur-[140px] opacity-20 animate-pulse top-10 left-10" />
-        <div className="absolute w-125 h-125 bg-blue-500 blur-[140px] opacity-20 animate-pulse bottom-10 right-10" />
-      </div>
+      <div className="max-w-6xl mx-auto p-8">
 
-      <div className="max-w-7xl mx-auto p-8">
+        <h1 className="text-3xl font-bold">Product Management</h1>
 
-        <h1 className="text-4xl font-bold">Product Management</h1>
-        <p className="text-gray-400 mt-2">
-          Add, edit and manage your products
-        </p>
-
-        {/* FORM */}
-        <form
-          onSubmit={editId ? updateProduct : addProduct}
-          className="backdrop-blur-xl bg-white/5 border border-white/10 p-6 rounded-3xl shadow-xl mb-10"
-        >
-
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Product Name"
-            className="p-3 rounded-xl bg-white/10 border border-white/10"
-          />
-
-          <input
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="Price"
-            className="p-3 rounded-xl bg-white/10 border border-white/10"
-          />
-
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Description"
-            rows="3"
-            className="mt-4 w-full p-3 rounded-xl bg-white/10 border border-white/10"
-          />
-
+        <form onSubmit={editId ? updateProduct : addProduct}>
+          <input name="name" value={form.name} onChange={handleChange} />
+          <input name="price" value={form.price} onChange={handleChange} />
+          <textarea name="description" value={form.description} onChange={handleChange} />
           <input type="file" multiple onChange={handleFiles} />
 
-          <button className="mt-5 bg-linear-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl">
-            {editId ? "Update Product" : "Add Product"}
+          <button type="submit">
+            {editId ? "Update" : "Add"}
           </button>
-
         </form>
 
-        {/* GRID */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-4 mt-10">
 
-          {Array.isArray(products) && products.length > 0 ? (
+          {products.length > 0 ? (
             products.map((p) => (
-              <div key={p._id} className="p-5 bg-white/5 rounded-xl">
-
-                <img
-                  src={p.images?.[0]?.url || "https://via.placeholder.com/300"}
-                  alt={p.name}
-                />
-
+              <div key={p._id} className="p-4 bg-white/10">
+                <img src={p.images?.[0]?.url} />
                 <h2>{p.name}</h2>
                 <p>₹{p.price}</p>
 
                 <button onClick={() => startEdit(p)}>Edit</button>
                 <button onClick={() => deleteProduct(p._id)}>Delete</button>
-
               </div>
             ))
           ) : (
-            <p className="text-gray-400">No products found</p>
+            <p>No products found</p>
           )}
 
         </div>
