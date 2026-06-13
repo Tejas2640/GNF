@@ -14,7 +14,7 @@ export default function Products() {
 
   const fetchProducts = async () => {
   try {
-    const res = api.get("/products");
+    const res = await api.get("/products");
 
     console.log("API RESPONSE:", res.data);
 
