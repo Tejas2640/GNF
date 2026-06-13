@@ -14,9 +14,9 @@ export default function Products() {
 
   const fetchProducts = async () => {
   try {
-    const res = await api.get("/products");
+    const res = api.get("/products");
 
-    
+    console.log("API RESPONSE:", res.data);
 
     setProducts(res.data.products); // ✅ FIXED
   } catch (error) {

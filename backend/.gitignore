@@ -27,3 +27,5 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+
+.createAdmin.js/
